@@ -1,5 +1,11 @@
+import { isSubstringOfArrayContained } from "../../utils/utils";
+
 export const DEFAULT_DELIMITER: string = '.';
+// ! Das hier ist nur ein \ !
 export const ESCAPE_CHARACTER = '\\';
+
+// Todo: Muss wirklich jedes Sonderzeichen escaped werden?
+export const SPECIAL_CHARACTERS: string[] = ['!', '"', "'", '§', '%', '&', '/', '/', '(', ')', '=', '?', '`', '´', '+', '*', '#', ',', ';', '.', ':', '-', '_', '~', '<', '>', '|', '}', ']', '[', '{', '^', '°', '\\'];
 
 /**
  * A name is a sequence of string components separated by a delimiter character.
@@ -19,8 +25,25 @@ export class Name {
     private components: string[] = [];
 
     /** Expects that all Name components are properly masked */
+    // Todo: Was wenn als Delemiter ein normaler Buchstabe kommt? ==> Ausnahme
     constructor(other: string[], delimiter?: string) {
-        throw new Error("needs implementation or deletion");
+        // If a delimiter is passed, it should overwrite the default delimiter
+        if (delimiter && delimiter.trim() !== '') {
+            this.delimiter = delimiter;
+        }
+
+        // Todo: Handling various other-Input variations
+        // What are the possible input scenarios for string[] ?
+        // null, undefined, leerer String, Delimiter als Zeichen innen drinnen: ..a => Muss escaped werden: .\\
+        // Nicht nur Delimiter escapen, sondern auch andere Sonderzeichen
+        if (!other) throw new Error("No valid input to construct word");
+        for (let component of other) {
+            if(component.includes(this.delimiter) || isSubstringOfArrayContained(component, SPECIAL_CHARACTERS)) {
+                // Todo: Korrektur der component
+                component = this.ensureEscapedComponent(component);
+            }
+            this.components.push(component);
+        }
     }
 
     /**
@@ -29,6 +52,7 @@ export class Name {
      * Users can vary the delimiter character to be used
      */
     public asString(delimiter: string = this.delimiter): string {
+        // Alle escapes müssen entfernt werden
         throw new Error("needs implementation or deletion");
     }
 
@@ -69,4 +93,39 @@ export class Name {
         throw new Error("needs implementation or deletion");
     }
 
+    private ensureEscapedComponent(component: string): string {
+        // Jedes Sonderzeichen + Delemiter muss escaped werden
+        let result = '';
+        for (let ch of component) {
+            if (ch.includes(this.delimiter) || isSubstringOfArrayContained(ch, SPECIAL_CHARACTERS)) {
+                ch = ESCAPE_CHARACTER + ch;
+            }
+            result.concat(ch);
+        }
+        return result;
+    }
+
+    private ensureUnEscapedComponent(component: string): string {
+        // Taucht ein Escape auf => Entfernen
+        let result = '';
+        let skip = false;
+        for (let ch of component) {
+            if (skip) {
+                skip = !skip;
+                result.concat(ch);
+                continue;
+            }
+
+            if (ch.includes(ESCAPE_CHARACTER)) {
+                skip = true;
+                continue;
+            }
+            result.concat(ch);
+        }
+        return result;
+    }
+
+    public getInternalRepresentation() {
+        return this.components;
+    }
 }
