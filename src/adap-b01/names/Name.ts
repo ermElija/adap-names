@@ -63,7 +63,7 @@ export class Name {
         let result = '';
         for (let i = 0; i < this.components.length; i++) {
             result = result + this.components[i];
-            if (i === this.components.length - 1) {
+            if (i < this.components.length - 1) {
                 result = result + ESCAPE_CHARACTER + DEFAULT_DELIMITER;
             }
         }
@@ -92,7 +92,7 @@ export class Name {
     /** Expects that new Name component c is properly masked */
     // @methodtype command-method
     public insert(i: number, c: string): void {
-        this.assertIndexInRange(i);
+        this.assertIndexInRange(i, true);
         this.components.splice(i, 0, this.asEscapedComponent(c));
     }
 
@@ -141,8 +141,12 @@ export class Name {
     }
 
     // @methodtype assertion-method
-    private assertIndexInRange(i: number): void {
-        if (i < 0 || i >= this.components.length) throw new Error("index out of bounds");
+    private assertIndexInRange(i: number, isEndAllowed: boolean = false): void {
+        if (isEndAllowed) {
+            if ((i < 0 || i >= this.components.length + 1)) throw new Error("index out of bounds");
+        } else {
+            if (i < 0 || i >= this.components.length) throw new Error("index out of bounds");
+        }
     }
 
     // @methodtype assertion-method
