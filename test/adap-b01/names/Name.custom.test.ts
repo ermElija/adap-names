@@ -49,10 +49,6 @@ const testInputComponents: string[][] = [
 
 describe('constructor tests', () => {
 
-    it('abc', () => {
-        const n = new Name(['db', 'cluster', 'node3']);
-        expect(n.getInternalRepresentation()).toEqual(['db', 'cluster', 'node3']);
-    });
 });
 
 describe('asString tests', () => {
@@ -82,3 +78,4 @@ describe('asString tests', () => {
     }); */
 });
 
+// ? Geht meine Implementierung korrekt mit leeren Komponenten um?

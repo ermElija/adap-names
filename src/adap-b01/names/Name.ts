@@ -1,11 +1,6 @@
-import { isSubstringOfArrayContained } from "../../utils/utils";
-
 export const DEFAULT_DELIMITER: string = '.';
-// ! Das hier ist nur ein \ !
+// ! Das hier ist nur ein \
 export const ESCAPE_CHARACTER = '\\';
-
-// Todo: Muss wirklich jedes Sonderzeichen escaped werden?
-export const SPECIAL_CHARACTERS: string[] = ['!', '"', "'", '§', '%', '&', '/', '/', '(', ')', '=', '?', '`', '´', '+', '*', '#', ',', ';', '.', ':', '-', '_', '~', '<', '>', '|', '}', ']', '[', '{', '^', '°', '\\'];
 
 /**
  * A name is a sequence of string components separated by a delimiter character.
@@ -22,27 +17,22 @@ export const SPECIAL_CHARACTERS: string[] = ['!', '"', "'", '§', '%', '&', '/',
 export class Name {
 
     private delimiter: string = DEFAULT_DELIMITER;
-    // * info: saves escaped componentes
+    //! info: saves escaped componentes
     private components: string[] = [];
 
     /** Expects that all Name components are properly masked */
-    // Todo: Was wenn als Delemiter ein normaler Buchstabe kommt? ==> Ausnahme
     constructor(other: string[], delimiter?: string) {
-        /* if () */
-        if (delimiter && delimiter.trim() !== '') {
-            this.delimiter = delimiter;
-        }
+        this.assertValidDelimiter(delimiter);
+        this.assertValidComponentsArray(other);
 
-        // Todo: Handling various other-Input variations
-        // ? Sicher dass alle Sonderzeichen escaped werden sollen
-        if (!other || other.length === 0) throw new Error("No valid input to construct word");
+        if (delimiter) this.delimiter = delimiter;
+
         for (let component of other) {
-            if(component.includes(this.delimiter) || isSubstringOfArrayContained(component, SPECIAL_CHARACTERS)) {
-                component = this.ensureEscapedComponent(component);
+            if(component.includes(this.delimiter) || component.includes(ESCAPE_CHARACTER)) {
+                component = this.asEscapedComponent(component);
             }
             this.components.push(component);
         }
-        console.log(this.components);
     }
 
     /**
@@ -52,12 +42,12 @@ export class Name {
      */
     // @methodtype conversion-method
     public asString(delimiter: string = this.delimiter): string {
-        let d = delimiter ? delimiter : this.delimiter;
+        this.assertValidDelimiter(delimiter);
         let result = '';
         for (let i = 0; i < this.components.length; i++) {
-            result = result + this.ensureUnEscapedComponent(this.components[i]);
+            result = result + this.asUnEscapedComponent(this.components[i]);
             if (i < this.components.length - 1) {
-                result = result + d;
+                result = result + delimiter;
             }
         }
         return result;
@@ -68,42 +58,61 @@ export class Name {
      * Machine-readable means that from a data string, a Name can be parsed back in
      * The control characters in the data string are the default characters
      */
+    // @methodtype conversion-method
     public asDataString(): string {
-        throw new Error("needs implementation or deletion");
+        let result = '';
+        for (let i = 0; i < this.components.length; i++) {
+            result = result + this.components[i];
+            if (i === this.components.length - 1) {
+                result = result + ESCAPE_CHARACTER + DEFAULT_DELIMITER;
+            }
+        }
+        return result;
     }
 
+    // @methodtype set-method
     public getComponent(i: number): string {
-        throw new Error("needs implementation or deletion");
+        this.assertIndexInRange(i);
+        return this.components[i];
     }
 
     /** Expects that new Name component c is properly masked */
+    // @methodtype set-method
     public setComponent(i: number, c: string): void {
-        throw new Error("needs implementation or deletion");
+        this.assertIndexInRange(i);
+        this.components.splice(i, 1, this.asEscapedComponent(c));
     }
 
      /** Returns number of components in Name instance */
+     // @methodtype get-method
      public getNoComponents(): number {
-        throw new Error("needs implementation or deletion");
+        return this.components.length;
     }
 
     /** Expects that new Name component c is properly masked */
+    // @methodtype command-method
     public insert(i: number, c: string): void {
-        throw new Error("needs implementation or deletion");
+        this.assertIndexInRange(i);
+        this.components.splice(i, 0, this.asEscapedComponent(c));
     }
 
     /** Expects that new Name component c is properly masked */
+    // @methodtype command-method
     public append(c: string): void {
-        throw new Error("needs implementation or deletion");
+        this.components.push(this.asEscapedComponent(c));
     }
 
+    // @methodtype command-method
     public remove(i: number): void {
-        throw new Error("needs implementation or deletion");
+        this.assertIndexInRange(i);
+        this.components.splice(i, 1);
     }
 
-    private ensureEscapedComponent(component: string): string {
+    // @methodtype conversion-method
+    private asEscapedComponent(component: string): string {
         let result = '';
         for (let ch of component) {
-            if (ch.includes(this.delimiter) || isSubstringOfArrayContained(ch, SPECIAL_CHARACTERS)) {
+            if (ch.includes(this.delimiter) || ch.includes(ESCAPE_CHARACTER)) {
                 ch = ESCAPE_CHARACTER + ch;
             }
             result = result.concat(ch);
@@ -111,7 +120,8 @@ export class Name {
         return result;
     }
 
-    private ensureUnEscapedComponent(component: string): string {
+    // @methodtype conversion-method
+    private asUnEscapedComponent(component: string): string {
         let result = '';
         let skip = false;
         for (let ch of component) {
@@ -130,8 +140,20 @@ export class Name {
         return result;
     }
 
-    // Todo: remove
-    public getInternalRepresentation() {
-        return this.components;
+    // @methodtype assertion-method
+    private assertIndexInRange(i: number): void {
+        if (i < 0 || i >= this.components.length) throw new Error("index out of bounds");
+    }
+
+    // @methodtype assertion-method
+    private assertValidDelimiter(delimiter?: string) {
+        if (!delimiter) return;
+        if (delimiter.trim() === '') throw new Error("Delimiter must not be empty");
+        if (/[a-zA-Z]/.test(delimiter)) throw new Error("Delimiter must not be a alphabet character");
+    }
+
+    // @methodtype assertion-method
+    private assertValidComponentsArray(other: string[]) {
+        if (other.length === 0) throw new Error("Component array input must not be empty");
     }
 }
