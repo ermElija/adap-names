@@ -73,9 +73,9 @@ describe('asString tests', () => {
         expect(n.asString('-')).equals('a-1-a-2-a-3');
     });
 
-    /* it('returns error for empty components iput', () => {
-        expect().toThrowError(new Name([]));
-    }); */
+    it('returns error for empty components iput', () => {
+        expect(() => new Name([])).toThrowError();
+    });
 });
 
 // ? Geht meine Implementierung korrekt mit leeren Komponenten um?
