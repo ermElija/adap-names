@@ -22,28 +22,27 @@ export const SPECIAL_CHARACTERS: string[] = ['!', '"', "'", '§', '%', '&', '/',
 export class Name {
 
     private delimiter: string = DEFAULT_DELIMITER;
+    // * info: saves escaped componentes
     private components: string[] = [];
 
     /** Expects that all Name components are properly masked */
     // Todo: Was wenn als Delemiter ein normaler Buchstabe kommt? ==> Ausnahme
     constructor(other: string[], delimiter?: string) {
-        // If a delimiter is passed, it should overwrite the default delimiter
+        /* if () */
         if (delimiter && delimiter.trim() !== '') {
             this.delimiter = delimiter;
         }
 
         // Todo: Handling various other-Input variations
-        // What are the possible input scenarios for string[] ?
-        // null, undefined, leerer String, Delimiter als Zeichen innen drinnen: ..a => Muss escaped werden: .\\
-        // Nicht nur Delimiter escapen, sondern auch andere Sonderzeichen
-        if (!other) throw new Error("No valid input to construct word");
+        // ? Sicher dass alle Sonderzeichen escaped werden sollen
+        if (!other || other.length === 0) throw new Error("No valid input to construct word");
         for (let component of other) {
             if(component.includes(this.delimiter) || isSubstringOfArrayContained(component, SPECIAL_CHARACTERS)) {
-                // Todo: Korrektur der component
                 component = this.ensureEscapedComponent(component);
             }
             this.components.push(component);
         }
+        console.log(this.components);
     }
 
     /**
@@ -51,9 +50,17 @@ export class Name {
      * Control characters are not escaped (creating a human-readable string)
      * Users can vary the delimiter character to be used
      */
+    // @methodtype conversion-method
     public asString(delimiter: string = this.delimiter): string {
-        // Alle escapes müssen entfernt werden
-        throw new Error("needs implementation or deletion");
+        let d = delimiter ? delimiter : this.delimiter;
+        let result = '';
+        for (let i = 0; i < this.components.length; i++) {
+            result = result + this.ensureUnEscapedComponent(this.components[i]);
+            if (i < this.components.length - 1) {
+                result = result + d;
+            }
+        }
+        return result;
     }
 
     /** 
@@ -94,25 +101,23 @@ export class Name {
     }
 
     private ensureEscapedComponent(component: string): string {
-        // Jedes Sonderzeichen + Delemiter muss escaped werden
         let result = '';
         for (let ch of component) {
             if (ch.includes(this.delimiter) || isSubstringOfArrayContained(ch, SPECIAL_CHARACTERS)) {
                 ch = ESCAPE_CHARACTER + ch;
             }
-            result.concat(ch);
+            result = result.concat(ch);
         }
         return result;
     }
 
     private ensureUnEscapedComponent(component: string): string {
-        // Taucht ein Escape auf => Entfernen
         let result = '';
         let skip = false;
         for (let ch of component) {
             if (skip) {
                 skip = !skip;
-                result.concat(ch);
+                result = result.concat(ch);
                 continue;
             }
 
@@ -120,11 +125,12 @@ export class Name {
                 skip = true;
                 continue;
             }
-            result.concat(ch);
+            result = result.concat(ch);
         }
         return result;
     }
 
+    // Todo: remove
     public getInternalRepresentation() {
         return this.components;
     }
