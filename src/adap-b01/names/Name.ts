@@ -70,7 +70,7 @@ export class Name {
         return result;
     }
 
-    // @methodtype set-method
+    // @methodtype get-method
     public getComponent(i: number): string {
         this.assertIndexInRange(i);
         return this.components[i];
