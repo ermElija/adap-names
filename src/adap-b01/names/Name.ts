@@ -27,11 +27,9 @@ export class Name {
 
         if (delimiter) this.delimiter = delimiter;
 
-        for (let component of other) {
-            if(component.includes(this.delimiter) || component.includes(ESCAPE_CHARACTER)) {
-                component = this.asEscapedComponent(component);
-            }
-            this.components.push(component);
+        for (const c of other) {
+            this.assertProperlyMasked(c);
+            this.components.push(c);
         }
     }
 
@@ -64,7 +62,7 @@ export class Name {
         for (let i = 0; i < this.components.length; i++) {
             result = result + this.components[i];
             if (i < this.components.length - 1) {
-                result = result + ESCAPE_CHARACTER + DEFAULT_DELIMITER;
+                result = result + DEFAULT_DELIMITER;
             }
         }
         return result;
@@ -80,7 +78,8 @@ export class Name {
     // @methodtype set-method
     public setComponent(i: number, c: string): void {
         this.assertIndexInRange(i);
-        this.components.splice(i, 1, this.asEscapedComponent(c));
+        this.assertProperlyMasked(c);
+        this.components.splice(i, 1, c);
     }
 
      /** Returns number of components in Name instance */
@@ -93,31 +92,21 @@ export class Name {
     // @methodtype command-method
     public insert(i: number, c: string): void {
         this.assertIndexInRange(i, true);
-        this.components.splice(i, 0, this.asEscapedComponent(c));
+        this.assertProperlyMasked(c);
+        this.components.splice(i, 0, c);
     }
 
     /** Expects that new Name component c is properly masked */
     // @methodtype command-method
     public append(c: string): void {
-        this.components.push(this.asEscapedComponent(c));
+        this.assertProperlyMasked(c);
+        this.components.push(c);
     }
 
     // @methodtype command-method
     public remove(i: number): void {
         this.assertIndexInRange(i);
         this.components.splice(i, 1);
-    }
-
-    // @methodtype conversion-method
-    private asEscapedComponent(component: string): string {
-        let result = '';
-        for (let ch of component) {
-            if (ch.includes(this.delimiter) || ch.includes(ESCAPE_CHARACTER)) {
-                ch = ESCAPE_CHARACTER + ch;
-            }
-            result = result.concat(ch);
-        }
-        return result;
     }
 
     // @methodtype conversion-method
@@ -160,4 +149,18 @@ export class Name {
     private assertValidComponentsArray(other: string[]) {
         if (other.length === 0) throw new Error("Component array input must not be empty");
     }
+
+    // @methodtype assertion-method
+    private assertProperlyMasked(component: string): void {
+    for (let i = 0; i < component.length; i++) {
+        const ch = component[i];
+        if (ch === this.delimiter) {
+            // Wenn ein Delimiter vorkommt, muss er escaped sein
+            if (i === 0 || component[i - 1] !== ESCAPE_CHARACTER) {
+                throw new Error(`Component "${component}" is not properly masked`);
+            }
+        }
+    }
+}
+
 }
