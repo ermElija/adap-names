@@ -80,6 +80,7 @@ export class StringArrayName implements Name {
         this.components.splice(i, 1);
     }
 
+    // Todo
     public concat(other: Name): void {
         throw new Error("needs implementation or deletion");
     }
