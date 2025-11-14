@@ -41,12 +41,14 @@ export class StringArrayName implements Name {
         return result;
     }
 
+    // Todo: Needs Tests
     public getDelimiterCharacter(): string {
-        throw new Error("needs implementation or deletion");
+        return this.delimiter;
     }
 
+    // Todo: Needs Tests
     public isEmpty(): boolean {
-        throw new Error("needs implementation or deletion");
+        return this.components.length > 0;
     }
 
     public getNoComponents(): number {
@@ -80,9 +82,14 @@ export class StringArrayName implements Name {
         this.components.splice(i, 1);
     }
 
-    // Todo
+    // Todo: Needs tests
     public concat(other: Name): void {
-        throw new Error("needs implementation or deletion");
+        if (other.isEmpty()) return;
+        // Dann wollen wir die Komponenten speichern
+        for (let i = 0; i < other.getNoComponents(); i++) {
+            const c = other.getComponent(i);
+            this.append(c);
+        }
     }
 
     // @methodtype conversion-method
