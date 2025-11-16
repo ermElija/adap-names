@@ -9,9 +9,9 @@ export class StringArrayName implements Name {
     constructor(source: string[], delimiter?: string) {
         this.assertValidDelimiter(delimiter);
         this.assertValidComponentsArray(source);
-
         if (delimiter) this.delimiter = delimiter;
 
+        // store fully masked components
         for (const c of source) {
             this.assertProperlyMasked(c);
             this.components.push(c);
@@ -20,25 +20,13 @@ export class StringArrayName implements Name {
 
     public asString(delimiter: string = this.delimiter): string {
         this.assertValidDelimiter(delimiter);
-        let result = '';
-        for (let i = 0; i < this.components.length; i++) {
-            result = result + this.asUnEscapedComponent(this.components[i]);
-            if (i < this.components.length - 1) {
-                result = result + delimiter;
-            }
-        }
-        return result;
+        return this.components
+            .map(c => this.unescape(c))
+            .join(delimiter);
     }
 
     public asDataString(): string {
-        let result = '';
-        for (let i = 0; i < this.components.length; i++) {
-            result = result + this.components[i];
-            if (i < this.components.length - 1) {
-                result = result + DEFAULT_DELIMITER;
-            }
-        }
-        return result;
+        return this.components.join(DEFAULT_DELIMITER);
     }
 
     public getDelimiterCharacter(): string {
@@ -61,7 +49,7 @@ export class StringArrayName implements Name {
     public setComponent(i: number, c: string): void {
         this.assertIndexInRange(i);
         this.assertProperlyMasked(c);
-        this.components.splice(i, 1, c);
+        this.components[i] = c;
     }
 
     public insert(i: number, c: string): void {
@@ -82,65 +70,60 @@ export class StringArrayName implements Name {
 
     public concat(other: Name): void {
         if (other.isEmpty()) return;
-        // Dann wollen wir die Komponenten speichern
         for (let i = 0; i < other.getNoComponents(); i++) {
             const c = other.getComponent(i);
-            this.append(c);
+            this.assertProperlyMasked(c);
+            this.components.push(c);
         }
     }
 
-    // @methodtype conversion-method
-    private asUnEscapedComponent(component: string): string {
-        let result = '';
-        let skip = false;
-        for (let ch of component) {
-            if (skip) {
-                skip = !skip;
-                result = result.concat(ch);
-                continue;
-            }
+    // =================== PRIVATE HELPERS =====================
 
-            if (ch.includes(ESCAPE_CHARACTER)) {
+    private unescape(component: string): string {
+        let result = "";
+        let skip = false;
+        for (const ch of component) {
+            if (skip) {
+                result += ch;
+                skip = false;
+            } else if (ch === ESCAPE_CHARACTER) {
                 skip = true;
-                continue;
+            } else {
+                result += ch;
             }
-            result = result.concat(ch);
         }
         return result;
     }
 
-    // @methodtype assertion-method
     private assertIndexInRange(i: number, isEndAllowed: boolean = false): void {
-        if (isEndAllowed) {
-            if ((i < 0 || i >= this.components.length + 1)) throw new Error("index out of bounds");
-        } else {
-            if (i < 0 || i >= this.components.length) throw new Error("index out of bounds");
-        }
+        const max = this.components.length + (isEndAllowed ? 1 : 0);
+        if (i < 0 || i >= max)
+            throw new Error("index out of bounds");
     }
 
-    // @methodtype assertion-method
     private assertValidDelimiter(delimiter?: string) {
         if (!delimiter) return;
-        if (delimiter.trim() === '') throw new Error("Delimiter must not be empty");
-        if (/[a-zA-Z]/.test(delimiter)) throw new Error("Delimiter must not be a alphabet character");
+        if (delimiter.trim() === "") throw new Error("Delimiter must not be empty");
+        if (/[a-zA-Z]/.test(delimiter)) throw new Error("Delimiter must not be alphabetic");
     }
 
-    // @methodtype assertion-method
     private assertValidComponentsArray(other: string[]) {
         if (other.length === 0) throw new Error("Component array input must not be empty");
     }
 
-    // @methodtype assertion-method
     private assertProperlyMasked(component: string): void {
         for (let i = 0; i < component.length; i++) {
             const ch = component[i];
-            if (ch === this.delimiter) {
-                // Wenn ein Delimiter vorkommt, muss er escaped sein
-                if (i === 0 || component[i - 1] !== ESCAPE_CHARACTER) {
-                    throw new Error(`Component "${component}" is not properly masked`);
-                }
+
+            // unescaped delimiter
+            if (ch === this.delimiter && component[i - 1] !== ESCAPE_CHARACTER) {
+                throw new Error(`Component "${component}" is not properly masked`);
+            }
+
+            // escaped escape must be "\\" (double)
+            if (ch === ESCAPE_CHARACTER && component[i + 1] === undefined) {
+                throw new Error("Escape at end not allowed");
             }
         }
     }
-
 }
