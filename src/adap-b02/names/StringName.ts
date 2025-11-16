@@ -11,10 +11,6 @@ export class StringName implements Name {
     this.assertValidDelimiter(delimiter);
     if (delimiter) this.delimiter = delimiter;
 
-    // ? Kann ein source mit escapeten Zeichen eingegeben werden? => Denke schon
-    // ? Da wo nicht escaped wurde ist ganz sicher der richtige delimiter, was escaped wurde, gehört mit zu einer einzelnen component
-
-    // Todo needs test
     this.noComponents++;
     let skip = false;
     for (const ch of source) {
@@ -26,18 +22,12 @@ export class StringName implements Name {
       if (ch === ESCAPE_CHARACTER) skip = true;
     }
 
-    // ? Kann man sonst den eingabestring 1-zu-1 übernehmen?
-    // => Wenn nichts escaped ist => übernehmen wir nichts escaptes
-    // => Wenn etwas escaped ist => Übernhemen wir es
-    // => Wir können nicht wissen
     this.name = source;
-    console.log('After Constructor: ', this.name, this.delimiter, this.noComponents);
   }
 
-  // Todo: needs tests
   public asString(delimiter: string = this.delimiter): string {
     // erst die richtigen delimiter durch den mitgegebenen ersetzen
-    let components = this.splitIntoComponents(this.name, delimiter);
+    let components = this.splitIntoComponents(this.name, this.delimiter);
     let nameWithDelimiter = "";
     for(let i = 0; i < components.length; i++) {
       if (i === components.length - 1) {
@@ -46,104 +36,66 @@ export class StringName implements Name {
         nameWithDelimiter = nameWithDelimiter.concat(components[i] + delimiter);
       }
     }
-
-    // dann als unescapt zurückgeben
-    return this.asUnEscapedComponent(this.name);
+    return this.asUnEscapedComponent(nameWithDelimiter);
   }
 
-  // Todo needs tests
   public asDataString(): string {
     return this.name;
   }
 
-  // Todo needs tests
   public getDelimiterCharacter(): string {
     return this.delimiter;
   }
 
-  // Todo needs tests
   public isEmpty(): boolean {
     return this.noComponents === 0;
   }
 
-  // Todo needs tests
   public getNoComponents(): number {
     return this.noComponents;
   }
 
-  // Todo needs tests
   public getComponent(x: number): string {
     this.assertIndexInRange(x);
     let components = this.splitIntoComponents(this.name, this.delimiter);
     return components[x];
   }
 
-  // Todo needs tests
   public setComponent(n: number, c: string): void {
+    this.noComponents--;
     this.assertIndexInRange(n);
     let components = this.splitIntoComponents(this.name, this.delimiter);
-    components = components.splice(n, 1, c);
+    components.splice(n, 1, c);
     this.name = this.convertComponentsInNameString(components);
   }
 
-  // Todo needs tests
   public insert(n: number, c: string): void {
     this.assertIndexInRange(n, true);
     this.noComponents++;
-    let components = this.splitIntoComponents(this.name, this.delimiter);
-    components = components.splice(n, 0, c);
+    let components = this.splitIntoComponents(this.name);
+    components.splice(n, 0, c);
     this.name = this.convertComponentsInNameString(components);
   }
 
-  // Todo needs tests
   public append(c: string): void {
     this.noComponents++;
     this.name = this.name + this.delimiter + c;
   }
 
-  // Todo needs tests
   public remove(n: number): void {
+    this.noComponents--;
     this.assertIndexInRange(n);
     let components = this.splitIntoComponents(this.name, this.delimiter);
-    components = components.splice(n, 1);
+    components.splice(n, 1);
     this.name = this.convertComponentsInNameString(components);
   }
 
-  // Todo needs tests
   public concat(other: Name): void {
     this.noComponents += other.getNoComponents();
     let componentsNew = this.splitIntoComponents(other.asDataString(), other.getDelimiterCharacter());
     this.name = this.name + this.delimiter + this.convertComponentsInNameString(componentsNew);
   }
 
-  private asStringArray(asEscaped: boolean = false): string[] {
-    const result: string[] = [];
-    let comp = '';
-    let skip = false;
-
-    for (const ch of this.name) {
-        if (skip) {
-            skip = !skip;
-            comp = comp.concat(ch);
-            continue;
-        }
-        if (ch === "\\") {
-            skip = true;
-            continue;
-        } else if (ch === this.delimiter) {
-            result.push(comp);
-            continue;
-        }
-        comp = comp.concat(ch);
-    }
-    return result;
-  }
-
-  /* private asUnescapedName(): string {
-    return this.asUnEscapedComponent(this.name);
-  } */
-
-  // Todo Needs tests
   private splitIntoComponents(name: string, delimiter: string = this.delimiter): string[] {
     let result = [];
     let component = "";
@@ -166,10 +118,10 @@ export class StringName implements Name {
       }
       component = component.concat(ch);
     }
+    result.push(component);
     return result;
   }
 
-  // Todo needs tests
   private convertComponentsInNameString(components: string[]): string {
     let result = '';
         for (let i = 0; i < components.length; i++) {

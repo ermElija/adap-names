@@ -9,6 +9,7 @@
     "test:b01": "vitest --dir test/adap-b01 --passWithNoTests",
     "test:b02": "vitest --dir test/adap-b02 --passWithNoTests",
     "test:b02:StringArrayName": "vitest test/adap-b02/names/StringArrayName.test.ts --passWithNoTests",
+    "test:b02:interchange": "vitest test/adap-b02/names/Name.interchange.interface.test.ts --passWithNoTests",
     "test:b03": "vitest --dir test/adap-b03 --passWithNoTests",
     "test:b04": "vitest --dir test/adap-b04 --passWithNoTests",
     "test:b05": "vitest --dir test/adap-b05 --passWithNoTests",

@@ -41,14 +41,12 @@ export class StringArrayName implements Name {
         return result;
     }
 
-    // Todo: Needs Tests
     public getDelimiterCharacter(): string {
         return this.delimiter;
     }
 
-    // Todo: Needs Tests
     public isEmpty(): boolean {
-        return this.components.length > 0;
+        return this.components.length === 0;
     }
 
     public getNoComponents(): number {
@@ -82,7 +80,6 @@ export class StringArrayName implements Name {
         this.components.splice(i, 1);
     }
 
-    // Todo: Needs tests
     public concat(other: Name): void {
         if (other.isEmpty()) return;
         // Dann wollen wir die Komponenten speichern
