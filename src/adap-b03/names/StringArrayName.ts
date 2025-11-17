@@ -19,26 +19,6 @@ export class StringArrayName extends AbstractName {
         throw new Error("needs implementation or deletion");
     }
 
-    public asDataString(): string {
-        throw new Error("needs implementation or deletion");
-    }
-
-    public isEqual(other: Name): boolean {
-        throw new Error("needs implementation or deletion");
-    }
-
-    public getHashCode(): number {
-        throw new Error("needs implementation or deletion");
-    }
-
-    public isEmpty(): boolean {
-        throw new Error("needs implementation or deletion");
-    }
-
-    public getDelimiterCharacter(): string {
-        throw new Error("needs implementation or deletion");
-    }
-
     public getNoComponents(): number {
         throw new Error("needs implementation or deletion");
     }
@@ -60,10 +40,6 @@ export class StringArrayName extends AbstractName {
     }
 
     public remove(i: number) {
-        throw new Error("needs implementation or deletion");
-    }
-
-    public concat(other: Name): void {
         throw new Error("needs implementation or deletion");
     }
 }
