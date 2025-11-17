@@ -7,9 +7,8 @@ export class StringArrayName extends AbstractName {
     protected components: string[] = [];
 
     constructor(source: string[], delimiter?: string) {
-        super();
+        super(delimiter ?? DEFAULT_DELIMITER);
         this.assertValidDelimiter(delimiter);
-        this.assertValidComponentsArray(source);
 
         // store fully masked components
         for (const c of source) {
@@ -17,9 +16,13 @@ export class StringArrayName extends AbstractName {
             this.components.push(c);
         }
     }
-    // todo
+
     public clone(): Name {
-        throw new Error("needs implementation or deletion");
+        const components = [];
+        for (let i = 0; i < this.getNoComponents(); i++) {
+            components.push(this.getComponent(i));
+        }
+        return new StringArrayName(components, this.getDelimiterCharacter());
     }
 
     public asString(delimiter: string = this.delimiter): string {
@@ -86,10 +89,6 @@ export class StringArrayName extends AbstractName {
         if (!delimiter) return;
         if (delimiter.trim() === "") throw new Error("Delimiter must not be empty");
         if (/[a-zA-Z]/.test(delimiter)) throw new Error("Delimiter must not be alphabetic");
-    }
-
-    private assertValidComponentsArray(other: string[]) {
-        if (other.length === 0) throw new Error("Component array input must not be empty");
     }
 
     private assertProperlyMasked(component: string): void {

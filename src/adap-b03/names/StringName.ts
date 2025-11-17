@@ -8,7 +8,7 @@ export class StringName extends AbstractName {
     protected noComponents: number = 0;
 
     constructor(source: string, delimiter?: string) {
-        super();
+        super(delimiter ?? DEFAULT_DELIMITER);
         this.assertNameString(source);
         this.assertValidDelimiter(delimiter);
 
@@ -17,9 +17,9 @@ export class StringName extends AbstractName {
 
         this.noComponents = this.countComponents(source, this.delimiter);
     }
-    // todo
+
     public clone(): Name {
-        throw new Error("needs implementation or deletion");
+        return new StringName(this.name, this.getDelimiterCharacter());
     }
 
     public asString(delimiter: string = this.delimiter): string {
