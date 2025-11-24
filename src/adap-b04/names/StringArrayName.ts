@@ -59,30 +59,34 @@ export class StringArrayName extends AbstractName {
         return this.components[i];
     }
 
-    // todo
     public setComponent(i: number, c: string) {
-        this.assertIndexInRange(i);
-        this.assertProperlyMasked(c);
+        this.assertIndexInRange_Pre(i);
+        this.assertProperlyMasked_Pre(c);
         this.components[i] = c;
+        // todo post
+        this.assertInvariant();
     }
 
-    // todo
     public insert(i: number, c: string) {
-        this.assertIndexInRange(i, true);
-        this.assertProperlyMasked(c);
+        this.assertIndexInRange_Pre(i, true);
+        this.assertProperlyMasked_Pre(c);
         this.components.splice(i, 0, c);
+        // todo post
+        this.assertInvariant();
     }
 
-    // todo
     public append(c: string) {
-        this.assertProperlyMasked(c);
+        this.assertProperlyMasked_Pre(c);
         this.components.push(c);
+        // todo post
+        this.assertInvariant();
     }
 
-    // todo
     public remove(i: number) {
-        this.assertIndexInRange(i);
+        this.assertIndexInRange_Pre(i);
         this.components.splice(i, 1);
+        // todo post
+        this.assertInvariant();
     }
 
     private unescape(component: string): string {
@@ -101,6 +105,10 @@ export class StringArrayName extends AbstractName {
         return result;
     }
 
+    protected assertIndexInRange_Pre(i: number, isEndAllowed: boolean = false) {
+        this.assertIndexInRange(i, isEndAllowed);
+    }
+
     private assertIndexInRange(i: number, isEndAllowed: boolean = false): void {
         const max = this.components.length + (isEndAllowed ? 1 : 0);
         if (i < 0 || i >= max)
@@ -111,6 +119,10 @@ export class StringArrayName extends AbstractName {
         if (!delimiter) return;
         if (delimiter.trim() === "") throw new InvalidStateException("Delimiter must not be empty");
         if (/[a-zA-Z]/.test(delimiter)) throw new InvalidStateException("Delimiter must not be alphabetic");
+    }
+
+    protected assertProperlyMasked_Pre(component: string) {
+        this.assertProperlyMasked(component);
     }
 
     private assertProperlyMasked(component: string): void {
