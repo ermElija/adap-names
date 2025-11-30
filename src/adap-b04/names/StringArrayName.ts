@@ -62,30 +62,62 @@ export class StringArrayName extends AbstractName {
     public setComponent(i: number, c: string) {
         this.assertIndexInRange_Pre(i);
         this.assertProperlyMasked_Pre(c);
+
+        const oldCount = this.getNoComponents();
+        const oldCopy = [...this.components];
+
         this.components[i] = c;
-        // todo post
+
+        this.assertSetComponent_CorrectComponent_Post(i, c);
+        this.assertSetComponent_ComponentCountUnchanged_Post(oldCount);
+        this.assertSetComponent_OtherComponentsUnchanged_Post(i, oldCopy);
+
         this.assertInvariant();
     }
 
     public insert(i: number, c: string) {
         this.assertIndexInRange_Pre(i, true);
         this.assertProperlyMasked_Pre(c);
+
+        const oldCount = this.getNoComponents();
+        const oldCopy = [...this.components];
+
         this.components.splice(i, 0, c);
-        // todo post
+
+        this.assertInsert_CorrectInserted_Post(i, c);
+        this.assertInsert_CountIncreased_Post(oldCount);
+        this.assertInsert_OtherComponentsShifted_Post(i, oldCopy);
+
         this.assertInvariant();
     }
 
     public append(c: string) {
         this.assertProperlyMasked_Pre(c);
+
+        const oldCount = this.getNoComponents();
+        const oldCopy = [...this.components];
+
         this.components.push(c);
-        // todo post
+
+        this.assertAppend_CountIncreased_Post(oldCount);
+        this.assertAppend_LastComponentCorrect_Post(c);
+        this.assertAppend_OtherComponentsUnchanged_Post(oldCopy);
+
         this.assertInvariant();
     }
 
     public remove(i: number) {
         this.assertIndexInRange_Pre(i);
+
+        const oldCount = this.getNoComponents();
+        const oldCopy = [...this.components];
+
         this.components.splice(i, 1);
-        // todo post
+
+        this.assertRemove_CountDecreased_Post(oldCount);
+        this.assertRemove_CorrectComponentRemoved_Post(i, oldCopy);
+        this.assertRemove_OtherComponentsShifted_Post(i, oldCopy);
+
         this.assertInvariant();
     }
 
@@ -160,6 +192,102 @@ export class StringArrayName extends AbstractName {
     protected assertEqualAfterClone_Post(clone: Name) {
         if (!clone.isEqual(this)) {
             throw new MethodFailedException("Not equal after cloned")
+        }
+    }
+
+    protected assertSetComponent_CorrectComponent_Post(i: number, c: string): void {
+        if (this.components[i] !== c) {
+            throw new MethodFailedException("setComponent(): component not correctly updated");
+        }
+    }
+
+    protected assertSetComponent_ComponentCountUnchanged_Post(oldCount: number): void {
+        if (this.getNoComponents() !== oldCount) {
+            throw new MethodFailedException("setComponent(): component count changed unexpectedly");
+        }
+    }
+
+    protected assertSetComponent_OtherComponentsUnchanged_Post(
+        i: number,
+        oldComponents: string[]
+    ): void {
+        for (let idx = 0; idx < this.components.length; idx++) {
+            if (idx === i) continue;
+            if (this.components[idx] !== oldComponents[idx]) {
+                throw new MethodFailedException(
+                    `setComponent(): component at index ${idx} was modified unexpectedly`
+                );
+            }
+        }
+    }
+
+    protected assertInsert_CorrectInserted_Post(i: number, c: string): void {
+        if (this.components[i] !== c) {
+            throw new MethodFailedException("insert(): component not inserted at correct index");
+        }
+    }
+
+    protected assertInsert_CountIncreased_Post(oldCount: number): void {
+        if (this.getNoComponents() !== oldCount + 1) {
+            throw new MethodFailedException("insert(): component count not increased by 1");
+        }
+    }
+
+    protected assertInsert_OtherComponentsShifted_Post(
+        i: number,
+        oldComponents: string[]
+    ): void {
+        for (let idx = 0; idx < oldComponents.length; idx++) {
+            const newIndex = idx < i ? idx : idx + 1;
+            if (this.components[newIndex] !== oldComponents[idx]) {
+                throw new MethodFailedException("insert(): surrounding components corrupted");
+            }
+        }
+    }
+
+    protected assertAppend_CountIncreased_Post(oldCount: number): void {
+        if (this.getNoComponents() !== oldCount + 1) {
+            throw new MethodFailedException("append(): component count not increased by 1");
+        }
+    }
+
+    protected assertAppend_LastComponentCorrect_Post(c: string): void {
+        if (this.components[this.components.length - 1] !== c) {
+            throw new MethodFailedException("append(): component appended incorrectly");
+        }
+    }
+
+    protected assertAppend_OtherComponentsUnchanged_Post(oldComponents: string[]): void {
+        for (let i = 0; i < oldComponents.length; i++) {
+            if (this.components[i] !== oldComponents[i]) {
+                throw new MethodFailedException("append(): existing components altered unexpectedly");
+            }
+        }
+    }
+
+    protected assertRemove_CountDecreased_Post(oldCount: number): void {
+        if (this.getNoComponents() !== oldCount - 1) {
+            throw new MethodFailedException("remove(): component count not decreased by 1");
+        }
+    }
+
+    protected assertRemove_CorrectComponentRemoved_Post(i: number, oldComponents: string[]): void {
+        if (this.components[i] === oldComponents[i]) {
+            throw new MethodFailedException("remove(): component not removed");
+        }
+    }
+
+    protected assertRemove_OtherComponentsShifted_Post(
+        i: number,
+        oldComponents: string[]
+    ): void {
+        for (let oldIndex = 0; oldIndex < oldComponents.length; oldIndex++) {
+            if (oldIndex === i) continue;
+            const newIndex = oldIndex < i ? oldIndex : oldIndex - 1;
+
+            if (this.components[newIndex] !== oldComponents[oldIndex]) {
+                throw new MethodFailedException("remove(): components shifted incorrectly");
+            }
         }
     }
 
