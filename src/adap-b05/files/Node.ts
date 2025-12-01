@@ -1,3 +1,4 @@
+import { b } from "vitest/dist/chunks/suite.d.FvehnV49";
 import { IllegalArgumentException } from "../common/IllegalArgumentException";
 import { InvalidStateException } from "../common/InvalidStateException";
 
@@ -57,7 +58,21 @@ export class Node {
      * @param bn basename of node being searched for
      */
     public findNodes(bn: string): Set<Node> {
-        throw new Error("needs implementation or deletion");
+        this.assert_BaseName_Pre(bn);
+
+        const result = new Set<Node>();
+
+        if (bn === this.getBaseName()) {
+            result.add(this);
+        }
+
+        return result;
     }
+
+    protected assert_BaseName_Pre(bn: string): void {
+            if (bn === null || bn === undefined || bn.length === 0) {
+                throw new IllegalArgumentException("baseName must not be null or empty");
+            }
+        }
 
 }

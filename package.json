@@ -14,6 +14,7 @@
     "test:b04": "vitest --dir test/adap-b04 --passWithNoTests",
     "test:b04:interchange": "vitest test/adap-b04/names/Name.interchange.interface.test.ts --passWithNoTests",
     "test:b05": "vitest --dir test/adap-b05 --passWithNoTests",
+    "test:b05:custom": "vitest test/adap-b05/files/findNodes.test.ts --passWithNoTests",
     "test:b06": "vitest --dir test/adap-b06 --passWithNoTests"
   },
   "keywords": [],
