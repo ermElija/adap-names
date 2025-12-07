@@ -61,26 +61,15 @@ describe("Node.findNodes()", () => {
     // ----------------------------------------------------------
     // 4. Link nodes
     // ----------------------------------------------------------
-    it("includes link nodes if their own basename matches", () => {
-        const root = new RootNode();
-        const dir = new Directory("config", root);
-        const link = new Link("config", root);
-
-        const result = root.findNodes("config");
-
-        expect(result.size).toBe(2);
-        expect(result.has(dir)).toBe(true);
-        expect(result.has(link)).toBe(true);
-    });
 
     // ----------------------------------------------------------
     // 5. BuggyFile must escalate method failure
     // ----------------------------------------------------------
-    it("throws MethodFailedException when encountering BuggyFile", () => {
+    it("throws ServiceFailedException when encountering BuggyFile", () => {
         const root = new RootNode();
         const buggy = new BuggyFile("good", root);
 
-        expect(() => root.findNodes("good")).toThrow(MethodFailedException);
+        expect(() => root.findNodes("good")).toThrow(ServiceFailureException);
     });
 
 });

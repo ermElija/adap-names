@@ -60,6 +60,10 @@ export class Node {
     public findNodes(bn: string): Set<Node> {
         this.assert_BaseName_Pre(bn);
 
+        if (this.getBaseName().length === 0) {
+            throw new InvalidStateException("base name must not be empty for node");
+        }
+
         const result = new Set<Node>();
 
         if (bn === this.getBaseName()) {
@@ -70,9 +74,8 @@ export class Node {
     }
 
     protected assert_BaseName_Pre(bn: string): void {
-            if (bn === null || bn === undefined || bn.length === 0) {
-                throw new IllegalArgumentException("baseName must not be null or empty");
-            }
+        if (bn === null || bn === undefined || bn.length === 0) {
+            throw new IllegalArgumentException("baseName must not be null or empty");
         }
-
+    }
 }

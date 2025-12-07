@@ -1,6 +1,10 @@
+import { InvalidStateException } from "../common/InvalidStateException";
+import { MethodFailedException } from "../common/MethodFailedException";
+import { ServiceFailureException } from "../common/ServiceFailureException";
 import { Name } from "../names/Name";
 import { StringName } from "../names/StringName";
 import { Directory } from "./Directory";
+import { Node } from "./Node";
 
 export class RootNode extends Directory {
 
@@ -30,4 +34,22 @@ export class RootNode extends Directory {
         // null operation
     }
 
+    public findNodes(bn: string): Set<Node> {
+        this.assert_BaseName_Pre(bn);
+
+        const result = new Set<Node>();
+
+        for (const child of this.childNodes) {
+            try {
+                const childResult = child.findNodes(bn);
+                for (const n of childResult) {
+                    result.add(n);
+                }
+            } catch (e) {
+                throw new ServiceFailureException("Child failed during findNodes()");
+            }
+        }
+
+        return result;
+    }
 }
